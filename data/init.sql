@@ -77,6 +77,76 @@ values  ('1', '普通用户'),
         ('2', '审核员'),
         ('3', '管理员');
 
+
+-- -----------------------------------------------------------------
+-- e_user: table
+CREATE TABLE `e_user`
+(
+    `id`         varchar(20) NOT NULL,
+    `gitee_id`   int          DEFAULT NULL,
+    `username`   varchar(50)  DEFAULT NULL,
+    `avatar_url` varchar(200) DEFAULT NULL,
+    `email`      varchar(200) DEFAULT NULL,
+    `role_id`    varchar(20)  DEFAULT NULL,
+    `html_url`   varchar(200) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `e_user_c_user_type_id_fk` (`role_id`),
+    CONSTRAINT `e_user_c_user_type_id_fk` FOREIGN KEY (`role_id`) REFERENCES `c_user_role` (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+-- e_request: table
+CREATE TABLE `e_request`
+(
+    `id`          varchar(20) NOT NULL,
+    `description` varchar(200) DEFAULT NULL,
+    `author_id`   varchar(20)  DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `e_request_e_user_id_fk` (`author_id`),
+    CONSTRAINT `e_request_e_user_id_fk` FOREIGN KEY (`author_id`) REFERENCES `e_user` (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+-- e_self_answer: table
+CREATE TABLE `e_self_answer`
+(
+    `id`         varchar(20)  NOT NULL,
+    `type_id`    varchar(20) DEFAULT NULL,
+    `content`    varchar(200) NOT NULL,
+    `author_id`  varchar(20) DEFAULT NULL,
+    `request_id` varchar(20) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `e_self_answer_c_answer_type_id_fk` (`type_id`),
+    KEY `e_self_answer_e_request_id_fk` (`request_id`),
+    KEY `e_self_answer_e_user_id_fk` (`author_id`),
+    CONSTRAINT `e_self_answer_c_answer_type_id_fk` FOREIGN KEY (`type_id`) REFERENCES `c_answer_type` (`id`),
+    CONSTRAINT `e_self_answer_e_request_id_fk` FOREIGN KEY (`request_id`) REFERENCES `e_request` (`id`),
+    CONSTRAINT `e_self_answer_e_user_id_fk` FOREIGN KEY (`author_id`) REFERENCES `e_user` (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+-- e_question: table
+CREATE TABLE `e_question`
+(
+    `id`              varchar(20) NOT NULL,
+    `std_description` varchar(250) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `question_std_description_uindex` (`std_description`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+
+
+-- -----------------------------------------------------------------
+
+
+
+
+
 -- e_answer: table
 CREATE TABLE `e_answer`
 (
@@ -132,16 +202,7 @@ CREATE TABLE `e_answer_browse_log`
 
 -- No native definition for element: e_answer_browse_log_e_user_id_fk (index)
 
--- e_question: table
-CREATE TABLE `e_question`
-(
-    `id`              varchar(20) NOT NULL,
-    `std_description` varchar(250) DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `question_std_description_uindex` (`std_description`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci;
+
 
 -- e_question_description: table
 CREATE TABLE `e_question_description`
@@ -184,39 +245,11 @@ CREATE TABLE `e_questioning_log`
 
 -- No native definition for element: e_question_browse_log_e_user_id_fk (index)
 
--- e_request: table
-CREATE TABLE `e_request`
-(
-    `id`          varchar(20) NOT NULL,
-    `description` varchar(200) DEFAULT NULL,
-    `author_id`   varchar(20)  DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    KEY `e_request_e_user_id_fk` (`author_id`),
-    CONSTRAINT `e_request_e_user_id_fk` FOREIGN KEY (`author_id`) REFERENCES `e_user` (`id`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci;
+
 
 -- No native definition for element: e_request_e_user_id_fk (index)
 
--- e_self_answer: table
-CREATE TABLE `e_self_answer`
-(
-    `id`         varchar(20)  NOT NULL,
-    `type_id`    varchar(20) DEFAULT NULL,
-    `content`    varchar(200) NOT NULL,
-    `author_id`  varchar(20) DEFAULT NULL,
-    `request_id` varchar(20) DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    KEY `e_self_answer_c_answer_type_id_fk` (`type_id`),
-    KEY `e_self_answer_e_request_id_fk` (`request_id`),
-    KEY `e_self_answer_e_user_id_fk` (`author_id`),
-    CONSTRAINT `e_self_answer_c_answer_type_id_fk` FOREIGN KEY (`type_id`) REFERENCES `c_answer_type` (`id`),
-    CONSTRAINT `e_self_answer_e_request_id_fk` FOREIGN KEY (`request_id`) REFERENCES `e_request` (`id`),
-    CONSTRAINT `e_self_answer_e_user_id_fk` FOREIGN KEY (`author_id`) REFERENCES `e_user` (`id`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci;
+
 
 -- No native definition for element: e_self_answer_c_answer_type_id_fk (index)
 
@@ -235,22 +268,7 @@ CREATE TABLE `e_tag`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
 
--- e_user: table
-CREATE TABLE `e_user`
-(
-    `id`         varchar(20) NOT NULL,
-    `gitee_id`   int          DEFAULT NULL,
-    `username`   varchar(50)  DEFAULT NULL,
-    `avatar_url` varchar(200) DEFAULT NULL,
-    `email`      varchar(200) DEFAULT NULL,
-    `role_id`    varchar(20)  DEFAULT NULL,
-    `html_url`   varchar(200) DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    KEY `e_user_c_user_type_id_fk` (`role_id`),
-    CONSTRAINT `e_user_c_user_type_id_fk` FOREIGN KEY (`role_id`) REFERENCES `c_user_role` (`id`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci;
+
 
 -- No native definition for element: e_user_c_user_type_id_fk (index)
 
