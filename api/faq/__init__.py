@@ -1,4 +1,5 @@
 import os
+
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
@@ -23,7 +24,7 @@ def create_app(test_config=None):
 
     db.init_app(app)
 
-    from . import review
+    from faq.blueprints import review
     app.register_blueprint(review.bp)
 
     return app
@@ -50,4 +51,3 @@ def configure(app, test_config):
     else:
         # load the test config if passed in
         app.config.from_mapping(test_config)
-

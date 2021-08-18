@@ -10,7 +10,7 @@ def create_index(es):
     a_body = dict()
     a_body['settings'] = get_setting()
     q_body['mappings'] = get_answer_mappings()
-    pprint.pprint(q_body) 
+    pprint.pprint(q_body)
     pprint.pprint(a_body)
     es.indices.create(index='questions', body=q_body)
     es.indices.create(index='answers', body=a_body)
@@ -63,11 +63,11 @@ def get_answer_mappings():
     return mappings
 
 
-def init_es():
+def init_es(secret_file='../faq_secret.ini'):
     import configparser
 
     config = configparser.ConfigParser()
-    config.read('faq_secret.ini')
+    config.read(secret_file)
 
     es = Elasticsearch(
         cloud_id=config['elastic']['cloud_id'],

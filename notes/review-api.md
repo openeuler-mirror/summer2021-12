@@ -71,6 +71,13 @@
     https://<>/review/{user_id}/show/questions
     ```
 
+  - param
+
+    | param key     | value         | meaning   |
+    | --            | --            | --        |
+    | page_size     | int           | 分页查询大小, 即返回条数|
+    | page          | int           | 分页查询页码 |
+    
 - 响应
   - body: `json`
 
@@ -104,7 +111,7 @@
     | path variable | value         | meaning   |
     | ---           | ---           | ---       |
     | user_id     | 20 位 string  | 审核员在数据库中主键 |
-    | question_id | string(20)      | 对应问题主键|
+    | question_id | string(20)      | 对应问题主键 |
 
 - 响应
   - body:`json`
@@ -116,10 +123,10 @@
             {
                 "id":"",
                 "q_id":"",
-                "type":"",
+                "type":"", // 枚举值, 不是序号 id
                 "content": "",
                 "summary": "",
-                "level": ""
+                "level": "" // 枚举值, 不是序号
             }
         ]
     }
@@ -128,12 +135,13 @@
 
 #### 问题审核接口
 
+- 
 - 请求
   - method: `POST`
   - url
 
     ```
-    https://<>/review/{user_id}/handle/question
+    https://<>/review/handle/requests/{user_id}
     ```
 
     | path variable | value         | meaning   |
@@ -152,20 +160,21 @@
         "merge_q": "", // 同义问题 id
         "merging_label": false, // 若合并同义问题, 是否合并标签 (取并集), 否则将舍弃 "tags" 字段
         "tags": [
-            "label name"  // string(100)
+            "label name"  // string(100) 最终有且仅有这些 tag 会挂在 这个新建的问题上
         ],
         "self_answers": [
             {
-                "id": "",
+                "id": "", // 若为管理员自己新加的解答(数据库中没有), 则同样添加为新解答
                 "allowed": false, // 是否收录, boolean
                 "comment": "", // 审核意见 string(200)
                 "type": "",
                 "content": "",
                 "summary": "",
+                "author_id":"",
                 "level": "" // string 解答的等级
             }
         ],
-        "adjusted_answer": [ // 调整过解答等级的解答. 为了添加新解答, 可能需要调整一些解答的等级.
+        "adjusted_answers": [ // 调整过解答等级的解答. 为了添加新解答, 可能需要调整一些解答的等级.
             {
                 "id": "",
                 "level": ""
@@ -247,7 +256,7 @@
   - url
 
     ```
-    https://<>/review/{user_id}/handle/answer-requests
+    https://<>/review/handle/answer-requests/{user_id}
     ```
 
     | path variable | value         | meaning   |
@@ -258,22 +267,19 @@
 
     ```json
     {
-        "status":200,
-        "body":{
-            "id":"",
-            "allowed":false,
-            "q_id":"",
-            "type":"",
-            "content":"",
-            "summary":"",
-            "level":"",
-            "comment":"",
-            "adjusted_answers":[
-                {
-                    "id":"",
-                    "level":""
-                }
-            ]
-        }
+        "id":"",
+        "q_id":"",
+        "type":"",
+        "content":"",
+        "summary":"",
+        "level":"",
+        "comment":"",
+        "adjusted_answers":[
+            {
+                "id":"",
+                "level":""
+            }
+        ]
     }
+    
     ```

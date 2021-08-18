@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="models generation" type="ShConfigurationType">
-    <option name="SCRIPT_TEXT" value="(.\venv\Scripts\Activate.ps1) ;((flask-sqlacodegen mysql://root:123456@localhost:3306/openeuler_faq --flask) -replace 'db = SQLAlchemy\(\)','from faq import db' -replace 'from flask_sqlalchemy import SQLAlchemy','' | out-file faq/models.py -encoding utf8)" />
+  <configuration default="false" name="update requirement.txt" type="ShConfigurationType">
+    <option name="SCRIPT_TEXT" value="(.\venv\Scripts\Activate.ps1) ; (python -m pip freeze &gt; requirements.txt)" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />
