@@ -6,7 +6,7 @@ from faq.models import EUser, ESelfAnswer, ERequest, \
 
 
 @dataclass
-class AuthorField:
+class UserField:
     id: str
     username: str
     avatar_url: str
@@ -26,7 +26,7 @@ class SelfAnswerEntry:
 
     def __init__(self, self_answer: ESelfAnswer):
         self.id = self_answer.id
-        self.type = self_answer.type.type
+        self.type = self_answer.type.type_name
         self.summary = self_answer.summary
         self.content = self_answer.content
 
@@ -36,15 +36,17 @@ class RequestEntry:
     id: str
     q_description: str
     time: datetime
-    author: AuthorField
+    author: UserField
     tags: list
     self_answers: list
+    reviewer: UserField
+    review_status: str
 
     def __init__(self, request: ERequest):
         self.id = request.id
         self.q_description = request.description
         self.time = request.time
-        self.author = AuthorField(request.author)
+        self.author = UserField(request.author)
         t: RRequestTagging
         self.tags = [t.tag.tag_name for t in request.r_request_taggings]
         self_answer: ESelfAnswer
@@ -52,6 +54,8 @@ class RequestEntry:
             SelfAnswerEntry(self_answer)
             for self_answer in request.e_self_answers
         ]
+        self.reviewer = UserField(request.reviewer)
+        self.review_status = request.c_review_statu.type
 
 
 @dataclass
@@ -71,33 +75,13 @@ class QuestionEntry:
 
 
 @dataclass
-class AnswerEntry:
-    id: str
-    q_id: str
-    type: str
-    content: str
-    summary: str
-    level: str
-
-    def __init__(self, answer: EAnswer) -> None:
-        self.id = answer.id
-        self.q_id = answer.question_id
-        self.type = answer.type.type_name
-        self.content = answer.content
-        self.summary = answer.summary
-        self.level = answer.level.level
-
-
-
-
-@dataclass
 class AnswerRequestEntry:
     id: str
     question: QuestionEntry
     type: str
     content: str
     summary: str
-    author: AuthorField
+    author: UserField
 
     def __init__(self, answer: EAnswer) -> None:
         self.id = answer.id
@@ -105,6 +89,26 @@ class AnswerRequestEntry:
         self.type = answer.type.type_name
         self.content = answer.content
         self.summary = answer.summary
-        self.author = AuthorField(answer.author)
+        self.author = UserField(answer.author)
 
 
+@dataclass
+class AnswerEntry:
+    id: str
+    level: str
+    reviewer: UserField
+    question: QuestionEntry
+    type: str
+    content: str
+    summary: str
+    author: UserField
+
+    def __init__(self, answer: EAnswer) -> None:
+        self.id = answer.id
+        self.reviewer = UserField(answer.reviewer)
+        self.question = QuestionEntry(answer.question)
+        self.type = answer.type.type_name
+        self.content = answer.content
+        self.summary = answer.summary
+        self.level = answer.level.level
+        self.author = UserField(answer.author)

@@ -1,6 +1,6 @@
-# NOTES
+# NOTES (deprecated)
 
-- [NOTES](#notes)
+- [NOTES (deprecated)](#notes-deprecated)
   - [API](#api)
     - [用户接口](#用户接口)
       - [提问接口](#提问接口)

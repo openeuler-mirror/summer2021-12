@@ -3,6 +3,7 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
+
 db = SQLAlchemy()
 
 
@@ -11,12 +12,6 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     configure(app, test_config)
 
-    # ensure the instance folder exists
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
-
     # a simple page that says hello
     @app.route('/')
     def hello():
@@ -24,8 +19,10 @@ def create_app(test_config=None):
 
     db.init_app(app)
 
-    from faq.blueprints import review
-    app.register_blueprint(review.bp)
+    from faq import blueprints
+    app.register_blueprint(blueprints.bp)
+    from faq import es_handler
+    app.register_blueprint(es_handler.bp)
 
     return app
 
@@ -34,7 +31,11 @@ def configure(app, test_config):
     import configparser
     config = configparser.ConfigParser()
     config.read('faq_secret.ini')
-
+    assert 'mysql' in config
+    assert 'username' in config['mysql']
+    assert 'password' in config['mysql']
+    assert 'ip' in config['mysql']
+    assert 'port' in config['mysql']
     app.config.from_mapping(
         SECRET_KEY='dev',
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
@@ -49,5 +50,5 @@ def configure(app, test_config):
         # load the instance config, if it exists, when not testing
         app.config.from_pyfile('config.py', silent=True)
     else:
-        # load the test config if passed in
+        # load the tests config if passed in
         app.config.from_mapping(test_config)

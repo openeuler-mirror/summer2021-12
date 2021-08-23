@@ -4,7 +4,7 @@ use openeuler_faq;
 
 CREATE TABLE `c_review_status`
 (
-    `id`   VARCHAR(20)  NOT NULL,
+    `id`   varchar(32)  NOT NULL,
     `type` VARCHAR(100) NOT NULL,
     PRIMARY KEY (`id`)
 );
@@ -12,11 +12,12 @@ CREATE TABLE `c_review_status`
 INSERT INTO `c_review_status`
 VALUES ('1', 'waiting'),
        ('2', 'allowed'),
-       ('3', 'denied');
+       ('3', 'denied'),
+       ('4', 'withdrawn');
 
 CREATE TABLE `c_answer_browse_type`
 (
-    `id`   varchar(20) NOT NULL,
+    `id`   varchar(32) NOT NULL,
     `type` varchar(100) DEFAULT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
@@ -24,14 +25,14 @@ CREATE TABLE `c_answer_browse_type`
   COLLATE = utf8mb4_0900_ai_ci;
 
 insert into c_answer_browse_type (id, type)
-values ('1', '浏览'),
-       ('2', '点赞'),
-       ('3', '踩');
+values ('1', 'browser'),
+       ('2', 'like'),
+       ('3', 'dislike');
 
 -- c_answer_level: table
 CREATE TABLE `c_answer_level`
 (
-    `id`    varchar(20)  NOT NULL,
+    `id`    varchar(32)  NOT NULL,
     `level` varchar(100) NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
@@ -48,7 +49,7 @@ values ('1', 'std'),
 -- c_answer_type: table
 CREATE TABLE `c_answer_type`
 (
-    `id`   varchar(20)  NOT NULL,
+    `id`   varchar(32)  NOT NULL,
     `type_name` varchar(100) NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
@@ -63,7 +64,7 @@ values ('1', 'text'),
 -- c_question_browse_type: table
 CREATE TABLE `c_question_browse_type`
 (
-    `id`   varchar(20) NOT NULL,
+    `id`   varchar(32) NOT NULL,
     `type` varchar(100) DEFAULT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
@@ -71,13 +72,13 @@ CREATE TABLE `c_question_browse_type`
   COLLATE = utf8mb4_0900_ai_ci;
 
 insert into c_question_browse_type (id, type)
-values ('1', '满意'),
-       ('2', '不满意');
+values ('1', 'like'),
+       ('2', 'dislike');
 
 -- c_user_role: table
 CREATE TABLE `c_user_role`
 (
-    `id`   varchar(20)  NOT NULL,
+    `id`   varchar(32)  NOT NULL,
     `type` varchar(100) NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
@@ -85,22 +86,217 @@ CREATE TABLE `c_user_role`
   COLLATE = utf8mb4_0900_ai_ci;
 
 insert into c_user_role (id, type)
-values ('1', '普通用户'),
-       ('2', '审核员'),
-       ('3', '管理员');
+values ('1', 'user'),
+       ('2', 'reviewer'),
+       ('3', 'admin');
 
 
 -- -----------------------------------------------------------------
 -- e_user: table
 CREATE TABLE `e_user`
 (
-    `id`         varchar(20) NOT NULL,
+    `id`         varchar(32) NOT NULL,
     `gitee_id`   int          DEFAULT NULL,
     `username`   varchar(50)  DEFAULT NULL,
     `avatar_url` varchar(200) DEFAULT NULL,
     `email`      varchar(200) DEFAULT NULL,
     `html_url`   varchar(200) DEFAULT NULL,
     PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- e_request: table
+
+DROP TABLE IF EXISTS e_request;
+CREATE TABLE `e_request`
+(
+    `id`            varchar(32) NOT NULL,
+    `description`   varchar(200) DEFAULT NULL,
+    `author_id`     varchar(32)  DEFAULT NULL,
+    `reviewer_id`   varchar(32)  default null,
+    `time`          datetime     DEFAULT NULL,
+    `review_status` varchar(32) NOT NULL,
+    `comment`       varchar(200) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `e_request_e_user_id_fk` (`author_id`),
+    KEY `e_request_e_user_id_fk2` (`reviewer_id`),
+    KEY `e_request_c_review_status_id_fk` (`review_status`),
+    CONSTRAINT `e_request_c_review_status_id_fk` FOREIGN KEY (`review_status`) REFERENCES `c_review_status` (`id`),
+    CONSTRAINT `e_request_e_user_id_fk` FOREIGN KEY (`author_id`) REFERENCES `e_user` (`id`),
+    constraint `e_request_e_user_id_fk2` foreign key (`reviewer_id`) references `e_user` (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+-- e_self_answer: table
+CREATE TABLE `e_self_answer`
+(
+    `id`         varchar(32)  NOT NULL,
+    `type_id`    varchar(32)  DEFAULT NULL,
+    `summary`    varchar(200) DEFAULT NULL,
+    `content`    varchar(200) NOT NULL,
+    `request_id` varchar(32)  DEFAULT NULL,
+    `review_status` varchar(32) DEFAULT NULL,
+    `comment`    VARCHAR(200) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `e_self_answer_c_answer_type_id_fk` (`type_id`),
+    KEY `e_self_answer_e_request_id_fk` (`request_id`),
+    KEY `e_self_answer_c_review_status_id_fk` (`review_status`),
+    CONSTRAINT `e_self_answer_c_review_status_id_fk` FOREIGN KEY (`review_status`) REFERENCES `c_review_status` (`id`),
+    CONSTRAINT `e_self_answer_c_answer_type_id_fk` FOREIGN KEY (`type_id`) REFERENCES `c_answer_type` (`id`),
+    CONSTRAINT `e_self_answer_e_request_id_fk` FOREIGN KEY (`request_id`) REFERENCES `e_request` (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+-- e_question: table
+CREATE TABLE `e_question`
+(
+    `id`              varchar(32) NOT NULL,
+    `std_description` varchar(250) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `question_std_description_uindex` (`std_description`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+-- e_answer: table
+CREATE TABLE `e_answer`
+(
+    `id`          varchar(32) NOT NULL,
+    `type_id`     varchar(32)  DEFAULT NULL,
+    `summary`     varchar(200) DEFAULT NULL,
+    `content`     varchar(200) DEFAULT NULL,
+    `author_id`   varchar(32)  DEFAULT NULL,
+    `question_id` varchar(32)  DEFAULT NULL,
+    `level_id`    varchar(32)  DEFAULT NULL,
+    `reviewer_id` varchar(32) DEFAULT NULL,
+    `comment`     VARCHAR(200) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `answer_c_answer_type_id_fk` (`type_id`),
+    KEY `e_answer_e_user_id_fk` (`author_id`),
+    KEY `e_answer_e_question_id_fk` (`question_id`),
+    KEY `e_answer_c_answer_level_id_fk` (`level_id`),
+    KEY `e_answer_e_user_id_fk2` (`reviewer_id`),
+    constraint `e_answer_e_user_id_fk2` foreign key (`reviewer_id`) references `e_user` (`id`),
+    CONSTRAINT `answer_c_answer_type_id_fk` FOREIGN KEY (`type_id`) REFERENCES `c_answer_type` (`id`),
+    CONSTRAINT `e_answer_c_answer_level_id_fk` FOREIGN KEY (`level_id`) REFERENCES `c_answer_level` (`id`),
+    CONSTRAINT `e_answer_e_question_id_fk` FOREIGN KEY (`question_id`) REFERENCES `e_question` (`id`),
+    CONSTRAINT `e_answer_e_user_id_fk` FOREIGN KEY (`author_id`) REFERENCES `e_user` (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+-- e_question_description: table
+CREATE TABLE `e_question_description`
+(
+    `id`          varchar(32)  NOT NULL,
+    `description` varchar(200) NOT NULL,
+    `question_id` varchar(32) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `question_description_question_id_fk` (`question_id`),
+    CONSTRAINT `question_description_question_id_fk` FOREIGN KEY (`question_id`) REFERENCES `e_question` (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+-- e_tag: table
+CREATE TABLE `e_tag`
+(
+    `id`     varchar(32)  NOT NULL,
+    `tag_name` VARCHAR(100) NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `tag_name_uindex` (tag_name)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- e_answer_browse_log: table
+CREATE TABLE `e_answer_browse_log`
+(
+    `id`        varchar(32) NOT NULL,
+    `time`      datetime    DEFAULT NULL,
+    `type_id`   varchar(32) DEFAULT NULL,
+    `answer_id` varchar(32) DEFAULT NULL,
+    `user_id`   varchar(32) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `e_answer_browse_log_e_answer_id_fk` (`answer_id`),
+    KEY `e_answer_browse_log_e_user_id_fk` (`user_id`),
+    KEY `e_answer_browse_log_c_answer_browse_type_id_fk` (`type_id`),
+    CONSTRAINT `e_answer_browse_log_c_answer_browse_type_id_fk` FOREIGN KEY (`type_id`) REFERENCES `c_answer_browse_type` (`id`),
+    CONSTRAINT `e_answer_browse_log_e_answer_id_fk` FOREIGN KEY (`answer_id`) REFERENCES `e_answer` (`id`),
+    CONSTRAINT `e_answer_browse_log_e_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `e_user` (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+-- e_questioning_log: table
+CREATE TABLE `e_questioning_log`
+(
+    `id`                  varchar(32) NOT NULL,
+    `type_id`             varchar(32)  DEFAULT NULL,
+    `op_time`             datetime     DEFAULT NULL,
+    `matched_question_id` varchar(32)  DEFAULT NULL,
+    `user_id`             varchar(32)  DEFAULT NULL,
+    `user_question`       varchar(100) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `e_question_browse_log_c_question__browse_type_id_fk` (`type_id`),
+    KEY `e_question_browse_log_e_question_id_fk` (`matched_question_id`),
+    KEY `e_question_browse_log_e_user_id_fk` (`user_id`),
+    CONSTRAINT `e_question_browse_log_c_question__browse_type_id_fk` FOREIGN KEY (`type_id`) REFERENCES `c_question_browse_type` (`id`),
+    CONSTRAINT `e_question_browse_log_e_question_id_fk` FOREIGN KEY (`matched_question_id`) REFERENCES `e_question` (`id`),
+    CONSTRAINT `e_question_browse_log_e_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `e_user` (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------------------
+
+-- r_question_tagging: table
+CREATE TABLE `r_question_tagging`
+(
+    `id`          varchar(32) NOT NULL,
+    `question_id` varchar(32) DEFAULT NULL,
+    `tag_id`      varchar(32) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `r_tagging_question_id_fk` (`question_id`),
+    KEY `r_tagging_tag_id_fk` (`tag_id`),
+    CONSTRAINT `r_tagging_question_id_fk` FOREIGN KEY (`question_id`) REFERENCES `e_question` (`id`),
+    CONSTRAINT `r_tagging_tag_id_fk` FOREIGN KEY (`tag_id`) REFERENCES `e_tag` (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+-- r_request_tagging: table
+CREATE TABLE `r_request_tagging`
+(
+    `id`         varchar(32) NOT NULL,
+    `tag_id`     varchar(32) NOT NULL,
+    `request_id` varchar(32) NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `r_request_tagging_e_request_id_fk` (`request_id`),
+    KEY `r_request_tagging_e_tag_id_fk` (`tag_id`),
+    CONSTRAINT `r_request_tagging_e_request_id_fk` FOREIGN KEY (`request_id`) REFERENCES `e_request` (`id`),
+    CONSTRAINT `r_request_tagging_e_tag_id_fk` FOREIGN KEY (`tag_id`) REFERENCES `e_tag` (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+-- r_role_attaching: table
+CREATE TABLE `r_role_attaching`
+(
+    `id`      varchar(32) NOT NULL,
+    `user_id` varchar(32) DEFAULT NULL,
+    `role_id` varchar(32) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `r_role_attaching_c_user_role_id_fk` (`role_id`),
+    KEY `r_role_attaching_e_user_id_fk` (`user_id`),
+    CONSTRAINT `r_role_attaching_c_user_role_id_fk` FOREIGN KEY (`role_id`) REFERENCES `c_user_role` (`id`),
+    CONSTRAINT `r_role_attaching_e_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `e_user` (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
@@ -117,28 +313,6 @@ VALUES ('1', 820, 'cctxg', 'gntbb', 'nlfoz', 'tkkth'),
        ('8', 483, 'lfxow', 'esdfb', 'qdvil', 'vimld'),
        ('9', 725, 'powbe', 'lshkm', 'wflph', 'ptcki');
 
--- e_request: table
-
-DROP TABLE IF EXISTS e_request;
-CREATE TABLE `e_request`
-(
-    `id`            varchar(20) NOT NULL,
-    `description`   varchar(200) DEFAULT NULL,
-    `author_id`     varchar(20)  DEFAULT NULL,
-    `reviewer_id`   varchar(20)  default null,
-    `time`          datetime     DEFAULT NULL,
-    `review_status` varchar(20) NOT NULL,
-    `comment`       varchar(200) DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    KEY `e_request_e_user_id_fk` (`author_id`),
-    KEY `e_request_e_user_id_fk2` (`reviewer_id`),
-    KEY `e_request_c_review_status_id_fk` (`review_status`),
-    CONSTRAINT `e_request_c_review_status_id_fk` FOREIGN KEY (`review_status`) REFERENCES `c_review_status` (`id`),
-    CONSTRAINT `e_request_e_user_id_fk` FOREIGN KEY (`author_id`) REFERENCES `e_user` (`id`),
-    constraint `e_request_e_user_id_fk2` foreign key (`reviewer_id`) references `e_user` (`id`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci;
 
 INSERT INTO e_request(id, description, author_id, reviewer_id, time, review_status, comment)
 VALUES ('1', 'wgmzn', '4', '8', '2003-01-16 13:58:21', '1', 'dkrdd'),
@@ -152,52 +326,17 @@ VALUES ('1', 'wgmzn', '4', '8', '2003-01-16 13:58:21', '1', 'dkrdd'),
        ('8', 'qvodm', '2', '6', '1990-12-18 15:37:57', '1', 'qosfr'),
        ('9', 'kduqz', '4', '5', '1979-09-09 04:27:31', '2', 'daxyy');
 
--- e_self_answer: table
-CREATE TABLE `e_self_answer`
-(
-    `id`         varchar(20)  NOT NULL,
-    `type_id`    varchar(20)  DEFAULT NULL,
-    `summary`    varchar(200) DEFAULT NULL,
-    `content`    varchar(200) NOT NULL,
-    `author_id`  varchar(20)  DEFAULT NULL,
-    `request_id` varchar(20)  DEFAULT NULL,
-    `review_status` varchar(20) DEFAULT NULL,
-    `comment`    VARCHAR(200) DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    KEY `e_self_answer_c_answer_type_id_fk` (`type_id`),
-    KEY `e_self_answer_e_request_id_fk` (`request_id`),
-    KEY `e_self_answer_e_user_id_fk` (`author_id`),
-    KEY `e_self_answer_c_review_status_id_fk` (`review_status`),
-    CONSTRAINT `e_self_answer_c_review_status_id_fk` FOREIGN KEY (`review_status`) REFERENCES `c_review_status` (`id`),
-    CONSTRAINT `e_self_answer_c_answer_type_id_fk` FOREIGN KEY (`type_id`) REFERENCES `c_answer_type` (`id`),
-    CONSTRAINT `e_self_answer_e_request_id_fk` FOREIGN KEY (`request_id`) REFERENCES `e_request` (`id`),
-    CONSTRAINT `e_self_answer_e_user_id_fk` FOREIGN KEY (`author_id`) REFERENCES `e_user` (`id`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci;
-
-INSERT INTO e_self_answer(id, type_id, summary, content, author_id, request_id, comment, review_status)
-VALUES ('1', '2', 'fngey', 'ycpyu', '2', '9', 'zvrfk', '1'),
-       ('10', '2', 'dvlkt', 'qryyp', '4', '6', 'nnkpv', '1'),
-       ('2', '2', 'reaqi', 'nuiex', '9', '5', 'rgwmz', '1'),
-       ('3', '1', 'cjfme', 'lfzxm', '9', '7', 'gomgm', '1'),
-       ('4', '2', 'rjsbt', 'qmvlv', '3', '8', 'rdweb', '1'),
-       ('5', '3', 'vujsi', 'hiteq', '6', '4', 'lcfgj', '1'),
-       ('6', '2', 'wjbma', 'mmmmf', '5', '2', 'scvlv', '1'),
-       ('7', '2', 'luxkg', 'qygex', '3', '9', 'tgunn', '1'),
-       ('8', '3', 'vbvtw', 'bwtuw', '1', '6', 'dbpkg', '1'),
-       ('9', '1', 'boevh', 'tsmbp', '4', '5', 'psoyi', '1');
-
--- e_question: table
-CREATE TABLE `e_question`
-(
-    `id`              varchar(20) NOT NULL,
-    `std_description` varchar(250) DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `question_std_description_uindex` (`std_description`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci;
+INSERT INTO e_self_answer(id, type_id, summary, content, request_id, comment, review_status)
+VALUES ('1', '2', 'fngey', 'ycpyu', '9', 'zvrfk', '1'),
+       ('10', '2', 'dvlkt', 'qryyp', '6', 'nnkpv', '1'),
+       ('2', '2', 'reaqi', 'nuiex', '5', 'rgwmz', '1'),
+       ('3', '1', 'cjfme', 'lfzxm', '7', 'gomgm', '1'),
+       ('4', '2', 'rjsbt', 'qmvlv', '8', 'rdweb', '1'),
+       ('5', '3', 'vujsi', 'hiteq', '4', 'lcfgj', '1'),
+       ('6', '2', 'wjbma', 'mmmmf', '2', 'scvlv', '1'),
+       ('7', '2', 'luxkg', 'qygex', '9', 'tgunn', '1'),
+       ('8', '3', 'vbvtw', 'bwtuw', '6', 'dbpkg', '1'),
+       ('9', '1', 'boevh', 'tsmbp', '5', 'psoyi', '1');
 
 INSERT INTO e_question(id, std_description)
 VALUES ('5', 'afjlj'),
@@ -211,32 +350,6 @@ VALUES ('5', 'afjlj'),
        ('6', 'slsxp'),
        ('10', 'zkugt');
 
--- e_answer: table
-CREATE TABLE `e_answer`
-(
-    `id`          varchar(20) NOT NULL,
-    `type_id`     varchar(20)  DEFAULT NULL,
-    `summary`     varchar(200) DEFAULT NULL,
-    `content`     varchar(200) DEFAULT NULL,
-    `author_id`   varchar(20)  DEFAULT NULL,
-    `question_id` varchar(20)  DEFAULT NULL,
-    `level_id`    varchar(20)  DEFAULT NULL,
-    `reviewer_id` varchar(20) DEFAULT NULL,
-    `comment`     VARCHAR(200) DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    KEY `answer_c_answer_type_id_fk` (`type_id`),
-    KEY `e_answer_e_user_id_fk` (`author_id`),
-    KEY `e_answer_e_question_id_fk` (`question_id`),
-    KEY `e_answer_c_answer_level_id_fk` (`level_id`),
-    KEY `e_answer_e_user_id_fk2` (`reviewer_id`),
-    constraint `e_answer_e_user_id_fk2` foreign key (`reviewer_id`) references `e_user` (`id`),
-    CONSTRAINT `answer_c_answer_type_id_fk` FOREIGN KEY (`type_id`) REFERENCES `c_answer_type` (`id`),
-    CONSTRAINT `e_answer_c_answer_level_id_fk` FOREIGN KEY (`level_id`) REFERENCES `c_answer_level` (`id`),
-    CONSTRAINT `e_answer_e_question_id_fk` FOREIGN KEY (`question_id`) REFERENCES `e_question` (`id`),
-    CONSTRAINT `e_answer_e_user_id_fk` FOREIGN KEY (`author_id`) REFERENCES `e_user` (`id`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci;
 INSERT INTO e_answer(id, type_id, summary, content, author_id, question_id, level_id, comment, reviewer_id)
 VALUES ('1', '2', 'qosnl', 'wgjix', '2', '8', '4', 'yyomd', '2'),
        ('10', '2', 'jzgfp', 'ryqba', '5', '3', '3', 'fxscn', '2'),
@@ -248,19 +361,6 @@ VALUES ('1', '2', 'qosnl', 'wgjix', '2', '8', '4', 'yyomd', '2'),
        ('7', '3', 'vokws', 'oswsu', '10', '7', '5', 'cxbtp', '2'),
        ('8', '2', 'wrcsz', 'mltom', '10', '6', '2', 'hbmqv', '2'),
        ('9', '3', 'zioyc', 'tongh', '1', '1', '2', 'esvcg', '2');
-
--- e_question_description: table
-CREATE TABLE `e_question_description`
-(
-    `id`          varchar(20)  NOT NULL,
-    `description` varchar(200) NOT NULL,
-    `question_id` varchar(20) DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    KEY `question_description_question_id_fk` (`question_id`),
-    CONSTRAINT `question_description_question_id_fk` FOREIGN KEY (`question_id`) REFERENCES `e_question` (`id`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci;
 
 INSERT INTO e_question_description(id, description, question_id)
 VALUES ('1', 'tgpqi', '9'),
@@ -274,17 +374,6 @@ VALUES ('1', 'tgpqi', '9'),
        ('8', 'kktnb', '4'),
        ('9', 'robnk', '2');
 
--- e_tag: table
-CREATE TABLE `e_tag`
-(
-    `id`     varchar(20)  NOT NULL,
-    `tag_name` VARCHAR(100) NOT NULL,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `tag_name_uindex` (tag_name)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci;
-
 INSERT INTO e_tag(id, tag_name)
 VALUES ('2', 'fefui'),
        ('7', 'gjqvb'),
@@ -296,26 +385,6 @@ VALUES ('2', 'fefui'),
        ('1', 'vqnab'),
        ('6', 'vvwyg'),
        ('3', 'ylymr');
-
-
--- e_answer_browse_log: table
-CREATE TABLE `e_answer_browse_log`
-(
-    `id`        varchar(20) NOT NULL,
-    `time`      datetime    DEFAULT NULL,
-    `type_id`   varchar(20) DEFAULT NULL,
-    `answer_id` varchar(20) DEFAULT NULL,
-    `user_id`   varchar(20) DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    KEY `e_answer_browse_log_e_answer_id_fk` (`answer_id`),
-    KEY `e_answer_browse_log_e_user_id_fk` (`user_id`),
-    KEY `e_answer_browse_log_c_answer_browse_type_id_fk` (`type_id`),
-    CONSTRAINT `e_answer_browse_log_c_answer_browse_type_id_fk` FOREIGN KEY (`type_id`) REFERENCES `c_answer_browse_type` (`id`),
-    CONSTRAINT `e_answer_browse_log_e_answer_id_fk` FOREIGN KEY (`answer_id`) REFERENCES `e_answer` (`id`),
-    CONSTRAINT `e_answer_browse_log_e_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `e_user` (`id`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci;
 
 INSERT INTO e_answer_browse_log(id, time, type_id, answer_id, user_id)
 VALUES ('1', '1996-08-28 09:39:25', '2', '6', '5'),
@@ -329,26 +398,6 @@ VALUES ('1', '1996-08-28 09:39:25', '2', '6', '5'),
        ('8', '1979-08-30 16:39:08', '2', '7', '6'),
        ('9', '1996-07-12 00:41:58', '3', '9', '9');
 
--- e_questioning_log: table
-CREATE TABLE `e_questioning_log`
-(
-    `id`                  varchar(20) NOT NULL,
-    `type_id`             varchar(20)  DEFAULT NULL,
-    `op_time`             datetime     DEFAULT NULL,
-    `matched_question_id` varchar(20)  DEFAULT NULL,
-    `user_id`             varchar(20)  DEFAULT NULL,
-    `user_question`       varchar(100) DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    KEY `e_question_browse_log_c_question__browse_type_id_fk` (`type_id`),
-    KEY `e_question_browse_log_e_question_id_fk` (`matched_question_id`),
-    KEY `e_question_browse_log_e_user_id_fk` (`user_id`),
-    CONSTRAINT `e_question_browse_log_c_question__browse_type_id_fk` FOREIGN KEY (`type_id`) REFERENCES `c_question_browse_type` (`id`),
-    CONSTRAINT `e_question_browse_log_e_question_id_fk` FOREIGN KEY (`matched_question_id`) REFERENCES `e_question` (`id`),
-    CONSTRAINT `e_question_browse_log_e_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `e_user` (`id`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci;
-
 INSERT INTO e_questioning_log(id, type_id, op_time, matched_question_id, user_id, user_question)
 VALUES ('1', '2', '2003-01-12 10:37:47', '5', '6', 'gwkzb'),
        ('10', '2', '1973-06-30 21:44:00', '1', '8', 'ojvci'),
@@ -360,24 +409,6 @@ VALUES ('1', '2', '2003-01-12 10:37:47', '5', '6', 'gwkzb'),
        ('7', '2', '2006-07-03 01:25:51', '8', '4', 'hegbl'),
        ('8', '1', '2018-04-18 19:49:38', '6', '2', 'hehxi'),
        ('9', '1', '2018-08-03 23:36:16', '9', '2', 'hunaz');
-
-
--- -----------------------------------------------------------------
-
--- r_question_tagging: table
-CREATE TABLE `r_question_tagging`
-(
-    `id`          varchar(20) NOT NULL,
-    `question_id` varchar(20) DEFAULT NULL,
-    `tag_id`      varchar(20) DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    KEY `r_tagging_question_id_fk` (`question_id`),
-    KEY `r_tagging_tag_id_fk` (`tag_id`),
-    CONSTRAINT `r_tagging_question_id_fk` FOREIGN KEY (`question_id`) REFERENCES `e_question` (`id`),
-    CONSTRAINT `r_tagging_tag_id_fk` FOREIGN KEY (`tag_id`) REFERENCES `e_tag` (`id`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci;
 
 INSERT INTO r_question_tagging(id, question_id, tag_id)
 VALUES ('1', '8', '4'),
@@ -391,21 +422,6 @@ VALUES ('1', '8', '4'),
        ('8', '3', '5'),
        ('9', '3', '10');
 
--- r_request_tagging: table
-CREATE TABLE `r_request_tagging`
-(
-    `id`         varchar(20) NOT NULL,
-    `tag_id`     varchar(20) NOT NULL,
-    `request_id` varchar(20) NOT NULL,
-    PRIMARY KEY (`id`),
-    KEY `r_request_tagging_e_request_id_fk` (`request_id`),
-    KEY `r_request_tagging_e_tag_id_fk` (`tag_id`),
-    CONSTRAINT `r_request_tagging_e_request_id_fk` FOREIGN KEY (`request_id`) REFERENCES `e_request` (`id`),
-    CONSTRAINT `r_request_tagging_e_tag_id_fk` FOREIGN KEY (`tag_id`) REFERENCES `e_tag` (`id`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci;
-
 INSERT INTO r_request_tagging(id, tag_id, request_id)
 VALUES ('1', '6', '2'),
        ('10', '2', '3'),
@@ -418,21 +434,6 @@ VALUES ('1', '6', '2'),
        ('8', '3', '9'),
        ('9', '4', '5');
 
--- r_role_attaching: table
-CREATE TABLE `r_role_attaching`
-(
-    `id`      varchar(20) NOT NULL,
-    `user_id` varchar(20) DEFAULT NULL,
-    `role_id` varchar(20) DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    KEY `r_role_attaching_c_user_role_id_fk` (`role_id`),
-    KEY `r_role_attaching_e_user_id_fk` (`user_id`),
-    CONSTRAINT `r_role_attaching_c_user_role_id_fk` FOREIGN KEY (`role_id`) REFERENCES `c_user_role` (`id`),
-    CONSTRAINT `r_role_attaching_e_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `e_user` (`id`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci;
-
 INSERT INTO r_role_attaching(id, user_id, role_id)
 VALUES ('1', '6', '2'),
        ('10', '4', '3'),
@@ -444,3 +445,4 @@ VALUES ('1', '6', '2'),
        ('7', '7', '2'),
        ('8', '2', '2'),
        ('9', '1', '3');
+
