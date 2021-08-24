@@ -1,0 +1,279 @@
+{
+	"info": {
+		"_postman_id": "0d3d1bca-0138-4627-b2f6-67a929a76625",
+		"name": "openEuler-FAQ",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "待审核问题request接口",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/show/requests-to-review/5?page_size=100&page=1",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"show",
+						"requests-to-review",
+						"5"
+					],
+					"query": [
+						{
+							"key": "page_size",
+							"value": "100"
+						},
+						{
+							"key": "page",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "所有 过审的 questions",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/show/questions?page_size=100&page=1",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"show",
+						"questions"
+					],
+					"query": [
+						{
+							"key": "page_size",
+							"value": "100"
+						},
+						{
+							"key": "page",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "待审 answer request",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/show/answer-requests-to-review/4?page_size=200&page=1",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"show",
+						"answer-requests-to-review",
+						"4"
+					],
+					"query": [
+						{
+							"key": "page_size",
+							"value": "200"
+						},
+						{
+							"key": "page",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "对应 question 的 所有答案",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/show/answers-of-q/46c60308032b11ec8a33b052162550b4",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"show",
+						"answers-of-q",
+						"46c60308032b11ec8a33b052162550b4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "answer 审批通过",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\":\"9a5a1a0c032d11ecb5f5b052162550b4\",\r\n    \"level\":\"std\",\r\n    \"comment\":\"good answer\",\r\n    \"adjusted_answers\":[]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/review/answer-requests/4",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"review",
+						"answer-requests",
+						"4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "request审批通过操作接口",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"id\": \"b4cd694f032211ec9c7bb052162550b4\",   \r\n        \"description\": \"how to install openEuler on linux centos?\",  \r\n        \"comment\": \"good question\",\r\n        \"allowed\": true,\r\n        \"merged\": false,\r\n        \"merge_q\": \"\",\r\n        \"merging_label\": false, \r\n        \"tags\": [\"postman\"],\r\n        \"self_answers\": [],\r\n        \"adjusted_answers\": []\r\n    }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/review/requests/5",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"review",
+						"requests",
+						"5"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "提问",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/user/questioning?answered_only&answer_level=std&top_k=5&q=how to",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"user",
+						"questioning"
+					],
+					"query": [
+						{
+							"key": "answered_only",
+							"value": null
+						},
+						{
+							"key": "answer_level",
+							"value": "std"
+						},
+						{
+							"key": "top_k",
+							"value": "5"
+						},
+						{
+							"key": "q",
+							"value": "how to"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "提出 request",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n      \"author_id\": \"3\", \r\n      \"description\": \"how to install openEuler on windows 11?\",\r\n      \"tags\": [\"linux\", \"installation\"],\r\n      \"answers\": [\r\n        {\r\n          \"type\": \"text\",\r\n          \"summary\": \"you cannot install openEuler on linux.\",\r\n          \"content\": \"you cannot install openEuler on linux.\"\r\n        },\r\n        {\r\n          \"type\": \"website\",\r\n          \"summary\": \"you cannot install openEuler on linux.\",\r\n          \"content\": \"https://www.baidu.com\"\r\n        }\r\n      ]\r\n    }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/user/request",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"user",
+						"request"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "提出 answer",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"author_id\": \"7\",\r\n    \"q_id\": \"46c60308032b11ec8a33b052162550b4\",\r\n    \"type\": \"text\",\r\n    \"content\": \"you cannot\",\r\n    \"summary\": \"you cannot install openeuler on windows.\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/user/answer-request",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"user",
+						"answer-request"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

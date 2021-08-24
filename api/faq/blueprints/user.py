@@ -141,11 +141,14 @@ def request_persistence(req_body, reviewer_id):
 
 
 def dispatch_request(tags: list, description: str, time: datetime) -> str:
-    return random.choice(list(set(attachment.user_id for attachment
-                                  in RRoleAttaching.query
-                                  .filter_by(role_id=CUserRole.query
-                                             .filter_by(type='reviewer')
-                                             .first().id))))
+    return random.choice(
+        list(set(
+            attachment.user_id for attachment
+            in RRoleAttaching.query.filter_by(
+                role_id=CUserRole.query.filter_by(type='reviewer').first().id
+            )
+        ))
+    )
 
 
 @bp.route('/answer-request', methods=['POST'])
@@ -198,6 +201,11 @@ def answer_persistence(req_body, reviewer_id):
 
 
 def dispatch_answer(q_id, author_id, content, summary, type_id):
-    return random.choice(list(set(attachment.user_id for attachment
-                                  in RRoleAttaching.query.filter_by(
-        role_id=CUserRole.query.filter_by(type='reviewer').first().id))))
+    return random.choice(
+        list(set(
+            attachment.user_id for attachment
+            in RRoleAttaching.query.filter_by(
+                role_id=CUserRole.query.filter_by(type='reviewer').first().id
+            )
+        ))
+    )

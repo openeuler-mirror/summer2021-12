@@ -60,7 +60,6 @@ def answers_of_q(question_id):
     page = (request.args.get('page'))
     per_page = (request.args.get('page_size'))
 
-    # todo: 加入参数用于控制返回值的 review status 和 level
     answers = EAnswer.query\
         .filter_by(question_id=str(question_id)) \
         .paginate(page=int(page) if page else None,

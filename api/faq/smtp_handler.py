@@ -46,5 +46,5 @@ def parse_request(request: ERequest):
     return "您有新的问题待审核。请登录网站查询。"
 
 
-def parse_answer_request(answer:EAnswer):
+def parse_answer_request(answer: EAnswer):
     return "您有新提交的答案待审核。请登录网站查询。"
