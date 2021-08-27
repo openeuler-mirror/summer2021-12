@@ -281,3 +281,28 @@ CREATE TABLE `r_role_attaching`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
+
+INSERT INTO e_user(id, gitee_id, username, avatar_url, email, html_url)
+VALUES ('1', 820, 'admin', 'gntbb', 'nlfoz', 'tkkth'),
+       ('2', 599, 'reviewer_yy', 'ixhpq', 'youngyee620@gmail.com', 'enggw'),
+       ('3', 975, 'reviewer_tt', 'tkmik', 'youngyee620@gmail.com', 'wrupl'),
+       ('4', 616, 'Tim', 'jiuxe', 'seolw', 'mdcfc'),
+       ('5', 735, 'bob', 'xgwsj', 'vzbsg', 'bvuzt');
+
+INSERT INTO e_tag(id, tag_name)
+VALUES ('2', 'linux'),
+       ('7', 'windows'),
+       ('8', 'centos'),
+       ('9', 'faq'),
+       ('4', 'openEuler');
+
+INSERT INTO r_role_attaching(id, user_id, role_id)
+VALUES ('1', '1', '1'),
+       ('2', '2', '1'),
+       ('3', '3', '1'),
+       ('4', '4', '1'),
+       ('5', '5', '1'),
+       ('6', '2', '2'),
+       ('7', '3', '2'),
+       ('8', '1', '3');
+

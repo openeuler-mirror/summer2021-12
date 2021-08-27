@@ -1,7 +1,7 @@
 venv/
 .vscode/
 
-api/faq_secret.ini
+api/faq/setting.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

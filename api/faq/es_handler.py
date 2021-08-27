@@ -78,22 +78,18 @@ def get_answer_mappings():
     return mappings
 
 
-def init_es(secret_file='faq_secret.ini') -> Elasticsearch:
-    import configparser
-
-    config = configparser.ConfigParser()
-    config.read(secret_file)
-    assert 'elastic' in config
-    if 'cloud_id' in config['elastic'] \
-            and "user" in config['elastic'] \
-            and 'password' in config['elastic']:
+def init_es() -> Elasticsearch:
+    from faq.setting import ElasticConfig
+    if 'CLOUD_ID' in ElasticConfig.__dict__ \
+            and 'USERNAME' in ElasticConfig.__dict__ \
+            and 'PASSWORD' in ElasticConfig.__dict__:
         _es = Elasticsearch(
-            cloud_id=config['elastic']['cloud_id'],
-            http_auth=(config['elastic']['user'], config['elastic']['password'])
+            cloud_id=ElasticConfig.CLOUD_ID,
+            http_auth=(ElasticConfig.USERNAME, ElasticConfig.PASSWORD)
         )
     else:
-        # todo: assert local elasticsearch
         _es = Elasticsearch()
+
     return _es
 
 

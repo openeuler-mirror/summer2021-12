@@ -37,7 +37,7 @@ def questioning():
            and request.args.get('top_k').isdigit() else 1
 
     if request.args.get('q') is None:
-        return jsonify(status=500, msg="param 'q' is required.")
+        return make_response(jsonify(status=500, msg="param 'q' is required."), 500)
     else:
         res = es.search(index='question', body={
             "query": {
@@ -47,8 +47,7 @@ def questioning():
                 }
             }
         })['hits']['hits']
-    q_ids = [r['_source']['qid'] for r in res]
-
+    q_ids = list(set(r['_source']['qid'] for r in res))
     body = []
     for qid in q_ids:
         if len(body) > top_k:
@@ -98,13 +97,13 @@ def propose_request():
             validate(request.get_json(), handle_request_schema)
         except ValidationError as e:
             msg = "json数据不符合schema规定：\n出错字段：{}\n提示信息：{}".format(".".join([str(i) for i in e.path]), e.message)
-            return jsonify(status=500, msg=msg)
+            return make_response(jsonify(status=500, msg=msg), 500)
     else:
-        return jsonify(msg="请求体必须是JSON格式", status=500)
+        return make_response(jsonify(msg="请求体必须是JSON格式", status=500), 500)
 
     req_body = request.get_json()
     if EUser.query.get(req_body['author_id']) is None:
-        return jsonify(status=500, msg="用户不存在")
+        return make_response(jsonify(status=500, msg="用户不存在"), 500)
 
     reviewer_id = dispatch_request(req_body['tags'], req_body['description'], now())
 
@@ -169,14 +168,14 @@ def propose_answer_request():
             validate(request.get_json(), handle_request_schema)
         except ValidationError as e:
             msg = "json数据不符合schema规定：\n出错字段：{}\n提示信息：{}".format(".".join([str(i) for i in e.path]), e.message)
-            return jsonify(status=500, msg=msg)
+            return make_response(jsonify(status=500, msg=msg), 500)
     else:
-        return jsonify(msg="请求体必须是JSON格式", status=500)
+        return make_response(jsonify(msg="请求体必须是JSON格式", status=500), 500)
     req_body = request.get_json()
     if EUser.query.filter_by(id=req_body['author_id']).first() is None:
-        return jsonify(status=200, msg="用户不存在：{}".format(req_body['author_id']))
+        return make_response(jsonify(status=200, msg="用户不存在：{}".format(req_body['author_id'])), 500)
     if EQuestion.query.filter_by(id=req_body['q_id']).first() is None:
-        return jsonify(status=200, msg="问题不存在：{}".format(req_body['q_id']))
+        return make_response(jsonify(status=200, msg="问题不存在：{}".format(req_body['q_id'])), 500)
 
     reviewer_id = dispatch_answer(req_body['q_id'], req_body['author_id'],
                                   req_body['content'], req_body['summary'],

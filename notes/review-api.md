@@ -38,7 +38,7 @@
         "self_answers": [ // 若不加申明则为 denied
             {
                 "id": "", // 若为管理员自己新加的解答(数据库中没有), 则同样添加为新解答
-                "allowed": false, // 是否收录, boolean
+                "allowed": false, // 是否收录, boolean, 若不加到 `self_answers` 则默认为被否决
                 "comment": "", // 审核意见 string(200)
                 "type": "",
                 "content": "",

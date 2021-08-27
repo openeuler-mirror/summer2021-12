@@ -103,7 +103,7 @@ def my_answers(author_id):
     show_withdrawn = bool(show_withdrawn and show_withdrawn.lower() == 'true')
 
     if EUser.query.filter_by(id=author_id).first() is None:
-        return jsonify(status=500, msg="用户不存在")
+        return make_response(jsonify(status=500, msg="用户不存在"),500)
 
     answers = EAnswer.query \
         .filter_by(author_id=author_id) \
@@ -120,7 +120,7 @@ def my_request(author_id):
     per_page = int(per_page) if per_page else None
 
     if EUser.query.filter_by(id=author_id).first() is None:
-        return jsonify(status=500, msg="用户不存在")
+        return make_response(jsonify(status=500, msg="用户不存在"), 500)
 
     requests = ERequest.query\
         .filter_by(author_id=author_id)\

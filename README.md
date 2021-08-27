@@ -16,28 +16,11 @@ clone repo
 $ git clone https://gitee.com/openeuler-competition/summer2021-12.git
 ```
 
-add a config file (required)
+create a config file: `api/faq/setting.py` (required)
+
+There is a example config file: `api/faq/setting.example.py`. Copy and change it if needed.
 
 ```shell
-$ cd summer2021-12/api && touch faq_secret.ini
+$ cd summer2021-12 && cat api/faq/setting.example.py > api/faq/setting.py
 ```
 
-example content in `/api/faq_secret.ini`:
-
-```
-[elastic]
-cloud_id = your-deployment:kjbfvb576fvjgv4e6cuvbkb9...
-user = elastic
-password = <password>
-
-[mysql]
-username = root
-password = 
-ip = 127.0.0.1
-port = 3306
-
-[smtp]
-host = "smtp.QQ.com"
-smtp_user = "xxx@qq.com"
-smtp_license = <smtp 服务授权码>
-```

@@ -28,27 +28,9 @@ def create_app(test_config=None):
 
 
 def configure(app, test_config):
-    import configparser
-    config = configparser.ConfigParser()
-    config.read('faq_secret.ini')
-    assert 'mysql' in config
-    assert 'username' in config['mysql']
-    assert 'password' in config['mysql']
-    assert 'ip' in config['mysql']
-    assert 'port' in config['mysql']
-    app.config.from_mapping(
-        SECRET_KEY='dev',
-        SQLALCHEMY_TRACK_MODIFICATIONS=False,
-        SQLALCHEMY_DATABASE_URI='mysql://'
-                                + config['mysql']['username'] + ':'
-                                + config['mysql']['password'] + '@'
-                                + config['mysql']['ip'] + ':'
-                                + config['mysql']['port'] + '/openeuler_faq'
-    )
+    from faq.setting import DevConfig
+    app.config.from_object(DevConfig)
 
-    if test_config is None:
-        # load the instance config, if it exists, when not testing
-        app.config.from_pyfile('config.py', silent=True)
-    else:
+    if test_config is not None:
         # load the tests config if passed in
         app.config.from_mapping(test_config)

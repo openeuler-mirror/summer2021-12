@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, make_response
 from jsonschema import validate, ValidationError
 
 from faq import db
@@ -26,14 +26,14 @@ def handle_request(reviewer_id):
     req_body = request.get_json()
     msg, status = check_request(reviewer_id, req_body)
     if status != 200:
-        return jsonify(status=status, msg=msg)
+        return make_response(jsonify(status=status, msg=msg), status)
 
     # no matter what happen, update the review state & comment.
     update_reviewing_status(req_body)
     # totally nothing wrong now. you can store it without check.
     persistence(req_body, reviewer_id)
 
-    return jsonify(status=200, msg="acknowledged")
+    return make_response(jsonify(status=200, msg="acknowledged"))
 
 
 def persistence(req_body, user_id):
@@ -59,8 +59,9 @@ def persistence(req_body, user_id):
                                             question_id=std_q.id))
         insert_answers_from_self_ans(std_q, req_body, user_id)
         for adjusted in req_body['adjusted_answers']:
-            level_id = CAnswerLevel.query.filter_by(level=adjusted['level'])
-            EAnswer.query.get(adjusted['id']).update({'level_id': level_id})
+            level_id = CAnswerLevel.query.filter_by(level=adjusted['level']).first().id
+            adjusted_ans = EAnswer.query.get(adjusted['id'])
+            adjusted_ans.level_id = level_id
         if req_body['merging_label']:
             add_taggings(std_q, req_body)
         db.session.commit()
@@ -85,11 +86,11 @@ def add_taggings(q, req_body):
                 db.session.add(RQuestionTagging(question_id=q.id,
                                                 tag_id=etag.id))
     else:
-        for tagging in RRequestTagging.query\
+        for tagging in RRequestTagging.query \
                 .filter_by(request_id=req_body['id']):
-            if RQuestionTagging\
+            if RQuestionTagging \
                     .query.filter_by(question_id=q.id,
-                                     tag_id=tagging.id)\
+                                     tag_id=tagging.id) \
                     .first() is None:
                 db.session.add(RQuestionTagging(question_id=q.id,
                                                 tag_id=tagging.id))
@@ -101,7 +102,7 @@ def insert_answers_from_self_ans(q, req_body, user_id):
             type_id = CAnswerType.query \
                 .filter_by(type_name=self_ans['type']).first().id
             level_id = CAnswerLevel.query \
-                .filter_by(level_name=self_ans['level']).first().id
+                .filter_by(level=self_ans['level']).first().id
             db.session.add(EAnswer(type_id=type_id,
                                    content=self_ans['content'],
                                    summary=self_ans['summary'],
@@ -204,7 +205,7 @@ def check_request(user_id, req_body):
     if ERequest.query.get(req_body['id']).reviewer_id != user_id:
         return "并不属于该审核员的请求.", 500
     if req_body['allowed'] and req_body['merged'] \
-            and EQuestion.query.get(req_body['merge_q']).first() is None:
+            and EQuestion.query.get(req_body['merge_q']) is None:
         return "待合并的标准问题不存在", 500
     # every question must have only one std answer.
     if req_body['allowed']:
@@ -229,11 +230,11 @@ def handle_answer_requests(user_id):
     req_body = request.get_json()
     msg, status = arg_check(user_id, req_body)
     if status != 200:
-        return jsonify(status=status, msg=msg)
+        return make_response(jsonify(status=status, msg=msg), status)
     answer_persistence(req_body)
     # todo: if add answer search in the future, sync es here.
     # sync_es()
-    return jsonify(status=200, msg='acknowledged')
+    return make_response(jsonify(status=200, msg='acknowledged'))
 
 
 def answer_persistence(req_body):
@@ -253,8 +254,9 @@ def answer_persistence(req_body):
     upd_ans.comment = req_body['comment']
     db.session.commit()
     for adjusted in req_body['adjusted_answers']:
-        ad_level_id = CAnswerLevel.query.filter_by(level=req_body['level'])
-        EAnswer.query.get(adjusted['id']).update({'level_id': ad_level_id})
+        ad_level_id = CAnswerLevel.query.filter_by(level=adjusted['level']).first().id
+        EAnswer.query.get(adjusted['id']).level_id = ad_level_id
+    db.session.commit()
 
 
 def arg_check(user_id, req_body):
@@ -311,7 +313,8 @@ def arg_check(user_id, req_body):
             or EAnswer.query.get(req_body['id']).level_id != __answer_level_id('undetermined'):
         return "该待审核解答不存在", 500
     adjusted = {elem['id']: elem['level'] for elem in req_body['adjusted_answers']}
-    n_std = 0
+
+    n_std = 1 if req_body['level'] == 'std' else 0
     for ans in EAnswer.query.filter_by(question_id=req_body['id']):
         level = adjusted[ans.id] if ans.id in adjusted else ans.level.level
         n_std += 1 if level == CAnswerLevel.query.get(__answer_level_id('std')) else 0
