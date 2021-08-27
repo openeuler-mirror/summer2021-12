@@ -25,7 +25,7 @@ CREATE TABLE `c_answer_browse_type`
   COLLATE = utf8mb4_0900_ai_ci;
 
 insert into c_answer_browse_type (id, type)
-values ('1', 'browser'),
+values ('1', 'browse'),
        ('2', 'like'),
        ('3', 'dislike');
 
