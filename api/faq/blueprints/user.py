@@ -14,8 +14,6 @@ from faq.smtp_handler import send, parse_request, parse_answer_request
 
 bp = Blueprint('user', __name__, url_prefix='/user')
 
-es = init_es()
-
 
 def __review_status_id(name: str) -> str:
     name = name.lower()
@@ -39,14 +37,15 @@ def questioning():
     if request.args.get('q') is None:
         return make_response(jsonify(status=500, msg="param 'q' is required."), 500)
     else:
-        res = es.search(index='question', body={
-            "query": {
-                "multi_match": {
-                    "query": request.args.get('q'),
-                    "fields": ['description', 'labels']
+        with init_es() as es:
+            res = es.search(index='question', body={
+                "query": {
+                    "multi_match": {
+                        "query": request.args.get('q'),
+                        "fields": ['description', 'labels']
+                    }
                 }
-            }
-        })['hits']['hits']
+            })['hits']['hits']
     q_ids = list(set(r['_source']['qid'] for r in res))
     body = []
     for qid in q_ids:

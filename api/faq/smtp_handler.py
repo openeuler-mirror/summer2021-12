@@ -32,12 +32,17 @@ def send(target, content):
 
     try:
         smtp_obj = smtplib.SMTP()
+    except smtplib.SMTPException:
+        print("Error: SMTP initialization failed")
+        return
+
+    try:
         smtp_obj.connect(mail_host, 25)  # 25 为 SMTP 端口号
         smtp_obj.login(mail_user, mail_pass)
         smtp_obj.sendmail(sender, [target, ], message.as_string())
         print("success: from {}, to {}".format(sender, target))
     except smtplib.SMTPException:
-        print("Error: 无法发送邮件")
+        print("Error: send failed")
     finally:
         smtp_obj.quit()
 

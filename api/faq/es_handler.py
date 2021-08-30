@@ -6,25 +6,26 @@ bp = Blueprint('es', __name__, cli_group=None)
 
 def sync_es():
     from faq.models import EQuestionDescription
-    es = init_es()
-    create_index(es)
-    q_dps = EQuestionDescription.query.filter()
-    dp: EQuestionDescription
-    body_l = [{
-        "_index": "question",
-        "_source": {"description": dp.description,
-                    "qid": dp.question_id,
-                    "labels": [tagging.tag.tag_name for tagging
-                               in dp.question.r_question_taggings]}
-    } for dp in q_dps]
-    helpers.bulk(client=es, actions=body_l)
+    with init_es() as es:
+        create_index(es)
+        q_dps = EQuestionDescription.query.all()
+        dp: EQuestionDescription
+        body_l = [{
+            "_index": "question",
+            "_source": {"description": dp.description,
+                        "qid": dp.question_id,
+                        "labels": [tagging.tag.tag_name for tagging
+                                   in dp.question.r_question_taggings]}
+        } for dp in q_dps]
+        helpers.bulk(client=es, actions=body_l)
 
 
 def create_index(_es):
     if _es.indices.exists(index='question'):
         _es.delete_by_query(index='question', body={"query": {"match_all": {}}})
     else:
-        _es.indices.create(index='question', body={"settings": get_setting(), "mappings": get_question_mappings()})
+        _es.indices.create(index='question',
+                           body={"settings": get_setting(), "mappings": get_question_mappings()})
     if _es.indices.exists(index='answer'):
         _es.delete_by_query(index='answer', body={"query": {"match_all": {}}})
     else:
@@ -87,6 +88,10 @@ def init_es() -> Elasticsearch:
             cloud_id=ElasticConfig.CLOUD_ID,
             http_auth=(ElasticConfig.USERNAME, ElasticConfig.PASSWORD)
         )
+    elif 'HOST' in ElasticConfig.__dict__ \
+            and 'PORT' in ElasticConfig.__dict__:
+        _es = Elasticsearch([{'host': ElasticConfig.HOST, 'port': ElasticConfig.PORT}],
+                            timeout=30, max_retries=10, retry_on_timeout=True)
     else:
         _es = Elasticsearch()
 
