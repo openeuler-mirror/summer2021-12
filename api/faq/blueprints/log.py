@@ -3,7 +3,7 @@ from jsonschema import validate, ValidationError
 from sqlalchemy.sql.functions import now
 
 from faq import db
-from faq.models import CAnswerBrowseType, EAnswerBrowseLog, CQuestionBrowseType, EQuestioningLog
+from faq.models import CAnswerBrowseType, EAnswerBrowseLog, CQuestionBrowseType, EQuestioningLog, CReviewStatu
 
 bp = Blueprint('log', __name__, url_prefix='/log')
 
@@ -77,7 +77,7 @@ def questioning():
                     "type": "string"
                 },
                 "type": {
-                    "enum": [],
+                    "enum": [tt.type for tt in CReviewStatu.query.all()],
                     "type": "string"
                 }
             }

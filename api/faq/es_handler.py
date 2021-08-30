@@ -46,18 +46,11 @@ def get_setting():
 def get_question_mappings():
     mappings = {
         "properties": {
-            "qid": {
-                "type": "keyword"
-            },
-            "labels": {
-                "type": "keyword"
-            },
-            "description": {
-                "type": "text"
-            }
+            "qid": {"type": "keyword"},
+            "labels": {"type": "keyword"},
+            "description": {"type": "text"}
         }
     }
-
     return mappings
 
 

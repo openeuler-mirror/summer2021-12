@@ -19,15 +19,26 @@ def tags():
 
 @bp.route('/enum/answer-level', methods=['GET'])
 def enum_answer_level():
-    return make_response(jsonify(status=200, data=CAnswerLevel.query.all()))
+    return make_response(jsonify(
+        status=200,
+        data=[{'id': cc.id, 'level': cc.level}
+              for cc in CAnswerLevel.query.all()]
+    ))
 
 
 @bp.route('/enum/answer-type', methods=['GET'])
 def enum_answer_type():
-    return make_response(jsonify(status=200, data=CAnswerType.query.all()))
+    return make_response(jsonify(
+        status=200,
+        data=[{'id': cc.id, 'type_name': cc.type_name}
+              for cc in CAnswerType.query.all()]
+    ))
 
 
 @bp.route('/enum/review-status', methods=['GET'])
 def enum_review_status():
-    return make_response(jsonify(status=200, data=CReviewStatu.query.all()))
+    return make_response(jsonify(
+        status=200,
+        data=[{'id': cc.id, 'type': cc.type} for cc in CReviewStatu.query.all()]
+    ))
 
