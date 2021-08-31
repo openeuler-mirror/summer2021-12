@@ -2,14 +2,14 @@ class ElasticConfig:
     CLOUD_ID = "your-deployment:cloud_id"
     USERNAME = "elastic"
     PASSWORD = "password"
+    HOST = "localhost"
+    PORT = 9200
 
 
 class DevConfig:
     SECRET_KEY = 'dev'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = "mysql://username:password@host:port/openeuler_faq"
-    HOST = "localhost"
-    PORT = 9200
 
 
 class SMTPConfig:
