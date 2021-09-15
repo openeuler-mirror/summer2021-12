@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
-    <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
-    </content>
-    <content url="file://$MODULE_DIR$/../data" />
     <content url="file://$MODULE_DIR$/../../../../downlaoded/Anaconda3/Anaconda">
       <excludeFolder url="file://$MODULE_DIR$/../../../../downlaoded/Anaconda3/anaconda" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.7 (api)" jdkType="Python SDK" />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/venv" />
+    </content>
+    <content url="file://$MODULE_DIR$/../data" />
+    <orderEntry type="jdk" jdkName="Python 3.8 (api)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TestRunnerService">
