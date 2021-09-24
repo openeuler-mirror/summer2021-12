@@ -25,8 +25,8 @@ def __answer_level_id(name: str) -> str:
 def requests_to_review(reviewer_id):
     page = int(request.args.get('page'))
     per_page = int(request.args.get('page_size'))
-    _processed = ("doc_processed" in request.args
-                  and request.args.get("doc_processed").lower() != 'false')
+    _processed = (request.args.get("doc_processed") is None
+                  or request.args.get("doc_processed").lower() != 'false')
 
     current_app.logger.info("request user id: %s", reviewer_id)
 
@@ -48,8 +48,8 @@ def requests_to_review(reviewer_id):
 def questions():
     page = int(request.args.get('page'))
     per_page = int(request.args.get('page_size'))
-    _processed = ("doc_processed" in request.args
-                  and request.args.get("doc_processed").lower() != 'false')
+    _processed = (request.args.get("doc_processed") is None
+                  or request.args.get("doc_processed").lower() != 'false')
 
     qs = EQuestion.query \
         .order_by(EQuestion.std_description) \
@@ -66,8 +66,8 @@ def questions():
 def answers_of_q(question_id):
     page = (request.args.get('page'))
     per_page = (request.args.get('page_size'))
-    _processed = ("doc_processed" in request.args
-                  and request.args.get("doc_processed").lower() != 'false')
+    _processed = (request.args.get("doc_processed") is None
+                  or request.args.get("doc_processed").lower() != 'false')
 
     answers = EAnswer.query \
         .filter_by(question_id=str(question_id)) \
@@ -83,8 +83,8 @@ def answers_of_q(question_id):
 def show_answer_requests(reviewer_id):
     page = (request.args.get('page'))
     per_page = (request.args.get('page_size'))
-    _processed = ("doc_processed" in request.args
-                  and request.args.get("doc_processed").lower() != 'false')
+    _processed = (request.args.get("doc_processed") is None
+                  or request.args.get("doc_processed").lower() != 'false')
 
     if EUser.query.filter_by(id=reviewer_id).first() is None:
         return make_response(jsonify(ErrorBody(reason='审查员的账户不存在')), 500)
@@ -114,8 +114,8 @@ def my_answers(author_id):
     page = int(page) if page else None
     per_page = int(per_page) if per_page else None
     show_withdrawn = bool(show_withdrawn and show_withdrawn.lower() == 'true')
-    _processed = ("doc_processed" in request.args
-                  and request.args.get("doc_processed").lower() != 'false')
+    _processed = (request.args.get("doc_processed") is None
+                  or request.args.get("doc_processed").lower() != 'false')
 
     if EUser.query.filter_by(id=author_id).first() is None:
         return make_response(jsonify(status=500, msg="用户不存在"), 500)
@@ -134,8 +134,8 @@ def my_request(author_id):
     per_page = (request.args.get('page_size'))
     page = int(page) if page else None
     per_page = int(per_page) if per_page else None
-    _processed = ("doc_processed" in request.args
-                  and request.args.get("doc_processed").lower() != 'false')
+    _processed = (request.args.get("doc_processed") is None
+                  or request.args.get("doc_processed").lower() != 'false')
 
     if EUser.query.filter_by(id=author_id).first() is None:
         return make_response(jsonify(status=500, msg="用户不存在"), 500)

@@ -125,6 +125,7 @@ class AnswerRequestEntry(Processable):
         self.content = process_document(self.content)
         self.summary = process_document(self.summary)
         self.author = self.author.process()
+        return self
 
 
 @dataclass
@@ -154,3 +155,4 @@ class AnswerEntry(Processable):
         self.content = process_document(self.content)
         self.summary = process_document(self.summary)
         self.author = self.author.process()
+        return self

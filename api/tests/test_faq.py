@@ -154,7 +154,7 @@ class MyTestCase(unittest.TestCase):
         ]
         merge_q = rv.get_json()[0]['id']
         rv = self.client.get('/show/answers-of-q/{}'.format(merge_q))
-        # pprint.pprint(rv.get_json())
+        pprint.pprint(rv.get_json())
         adjusted_answers = [
             {"id": rv.get_json()[0]['id'], 'level': 'good'},
             {"id": rv.get_json()[1]['id'], 'level': 'good'}

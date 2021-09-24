@@ -30,6 +30,7 @@ class AnswerEntry(Processable):
         self.content = process_document(self.content)
         self.summary = process_document(self.summary)
         self.author = self.author.process()
+        return self
 
 
 @dataclass
@@ -52,3 +53,4 @@ class QuestionEntry(Processable):
         self.descriptions = [des for des in self.descriptions]
         ans: AnswerEntry
         self.answers = [ans.process() for ans in self.answers]
+        return self
