@@ -1,12 +1,14 @@
 from dataclasses import dataclass
 from datetime import datetime
 
+from faq.content_handler import process_document
+from faq.dto import Processable
 from faq.models import EUser, ESelfAnswer, ERequest, \
     RRequestTagging, EQuestion, EQuestionDescription, EAnswer
 
 
 @dataclass
-class UserField:
+class UserField(Processable):
     id: str
     username: str
     avatar_url: str
@@ -16,9 +18,13 @@ class UserField:
         self.username = author.username
         self.avatar_url = author.avatar_url
 
+    def process(self):
+        self.username = process_document(self.username)
+        return self
+
 
 @dataclass
-class SelfAnswerEntry:
+class SelfAnswerEntry(Processable):
     id: str
     type: str
     summary: str
@@ -30,9 +36,14 @@ class SelfAnswerEntry:
         self.summary = self_answer.summary
         self.content = self_answer.content
 
+    def process(self):
+        self.summary = process_document(self.summary)
+        self.content = process_document(self.content)
+        return self
+
 
 @dataclass
-class RequestEntry:
+class RequestEntry(Processable):
     id: str
     q_description: str
     time: datetime
@@ -57,9 +68,20 @@ class RequestEntry:
         self.reviewer = UserField(request.reviewer)
         self.review_status = request.c_review_statu.type
 
+    def process(self):
+        self.q_description = process_document(self.q_description)
+        self.author = self.author.process()
+        self.tags = [process_document(t) for t in self.tags]
+        self.self_answers = [
+            self_answer.process()
+            for self_answer in self.self_answers
+        ]
+        self.reviewer = self.reviewer.process()
+        return self
+
 
 @dataclass
-class QuestionEntry:
+class QuestionEntry(Processable):
     id: str
     std_description: str
     descriptions: list
@@ -73,9 +95,16 @@ class QuestionEntry:
         des: EQuestionDescription
         self.descriptions = [des.description for des in question.e_question_descriptions]
 
+    def process(self):
+        self.std_description = process_document(self.std_description)
+        self.descriptions = [process_document(des)
+                             for des in self.descriptions]
+        self.tags = [process_document(t) for t in self.tags]
+        return self
+
 
 @dataclass
-class AnswerRequestEntry:
+class AnswerRequestEntry(Processable):
     id: str
     question: QuestionEntry
     type: str
@@ -91,9 +120,15 @@ class AnswerRequestEntry:
         self.summary = answer.summary
         self.author = UserField(answer.author)
 
+    def process(self):
+        self.question = self.question.process()
+        self.content = process_document(self.content)
+        self.summary = process_document(self.summary)
+        self.author = self.author.process()
+
 
 @dataclass
-class AnswerEntry:
+class AnswerEntry(Processable):
     id: str
     level: str
     reviewer: UserField
@@ -112,3 +147,10 @@ class AnswerEntry:
         self.summary = answer.summary
         self.level = answer.level.level
         self.author = UserField(answer.author)
+
+    def process(self):
+        self.reviewer = self.reviewer.process()
+        self.question = self.question.process()
+        self.content = process_document(self.content)
+        self.summary = process_document(self.summary)
+        self.author = self.author.process()

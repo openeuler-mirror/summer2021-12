@@ -67,10 +67,10 @@ def persistence(req_body, user_id):
         db.session.commit()
 
     sync_es()  # naive solution for now
-    # todo: in whatever situation, add a new document in elasticsearch.
-    if req_body['merged'] and req_body['merging_label']:
-        # todo: update all the doc of the same std question.
-        pass
+    # # todo: in whatever situation, add a new document in elasticsearch.
+    # if req_body['merged'] and req_body['merging_label']:
+    #     # todo: update all the doc of the same std question.
+    #     pass
 
 
 def add_taggings(q, req_body):

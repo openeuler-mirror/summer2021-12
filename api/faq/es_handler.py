@@ -92,4 +92,5 @@ def init_es() -> Elasticsearch:
 
 
 if __name__ == "__main__":
+    # test elasticsearch connection
     create_index(init_es())

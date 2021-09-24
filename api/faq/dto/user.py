@@ -1,11 +1,13 @@
 from dataclasses import dataclass
 
+from faq.content_handler import process_document
+from faq.dto import Processable
 from faq.dto.review import UserField
 from faq.models import EAnswer, EQuestion
 
 
 @dataclass
-class AnswerEntry:
+class AnswerEntry(Processable):
     id: str
     level: str
     reviewer: UserField
@@ -23,9 +25,15 @@ class AnswerEntry:
         self.level = answer.level.level
         self.author = UserField(answer.author)
 
+    def process(self):
+        self.reviewer = self.reviewer.process()
+        self.content = process_document(self.content)
+        self.summary = process_document(self.summary)
+        self.author = self.author.process()
+
 
 @dataclass
-class QuestionEntry:
+class QuestionEntry(Processable):
     id: str
     std_description: str
     descriptions: list
@@ -39,4 +47,8 @@ class QuestionEntry:
         self.tags = [tagging.tag.tag_name for tagging in question.r_question_taggings]
         self.answers = []
 
-
+    def process(self):
+        self.std_description = process_document(self.std_description)
+        self.descriptions = [des for des in self.descriptions]
+        ans: AnswerEntry
+        self.answers = [ans.process() for ans in self.answers]
