@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+import os
 
 
 db = SQLAlchemy()
@@ -27,6 +28,8 @@ def create_app(test_config=None):
 
 def configure(app, test_config):
     from faq.setting import DevConfig
+    # for key in DevConfig.__dict__:
+    #     DevConfig.__dict__[key] = os.getenv(key, default=DevConfig.__dict__[key])
     app.config.from_object(DevConfig)
 
     if test_config is not None:

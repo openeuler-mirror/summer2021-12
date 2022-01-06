@@ -1,9 +1,9 @@
 class ElasticConfig:
-    CLOUD_ID = "your-deployment:cloud_id"
-    USERNAME = "elastic"
-    PASSWORD = "password"
-    HOST = "localhost"
-    PORT = 9200
+    ES_CLOUD_ID = "your-deployment:cloud_id"
+    ES_USERNAME = "elastic"
+    ES_PASSWORD = "password"
+    ES_HOST = "localhost"
+    ES_PORT = 9200
 
 
 class DevConfig:
@@ -13,9 +13,9 @@ class DevConfig:
 
 
 class SMTPConfig:
-    HOST = "smtp.QQ.com"
-    USER = "xxx@qq.com"
-    LICENSE = "license"
+    SMTP_HOST = "smtp.QQ.com"
+    SMTP_USER = "xxx@qq.com"
+    SMTP_LICENSE = "license"
 
 
 class TestConfig:

@@ -9,9 +9,9 @@ from faq.models import ERequest, EAnswer
 def get_config():
     _conf = dict()
     from faq.setting import SMTPConfig
-    _conf['host'] = SMTPConfig.HOST
-    _conf['smtp_user'] = SMTPConfig.USER
-    _conf['smtp_license'] = SMTPConfig.LICENSE
+    _conf['host'] = SMTPConfig.SMTP_HOST
+    _conf['smtp_user'] = SMTPConfig.SMTP_USER
+    _conf['smtp_license'] = SMTPConfig.SMTP_LICENSE
     return _conf
 
 

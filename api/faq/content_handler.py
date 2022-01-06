@@ -1,6 +1,6 @@
 import jieba
 
-words_file_paths = ["words/ad.txt", "words/politics.txt", "words/sex.txt"]
+words_file_paths = ["faq/words/ad.txt", "faq/words/politics.txt", "faq/words/sex.txt"]
 
 
 def load_my_userdict():

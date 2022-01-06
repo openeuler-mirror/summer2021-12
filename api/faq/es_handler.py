@@ -1,3 +1,5 @@
+import os
+
 from elasticsearch import Elasticsearch, helpers
 from flask import Blueprint
 
@@ -74,16 +76,22 @@ def get_answer_mappings():
 
 def init_es() -> Elasticsearch:
     from faq.setting import ElasticConfig
+    # for key in ElasticConfig.__dict__:
+    #     ElasticConfig.__dict__[key] = os.getenv(key, default=ElasticConfig.__dict__[key])
+
     if 'CLOUD_ID' in ElasticConfig.__dict__ \
             and 'USERNAME' in ElasticConfig.__dict__ \
             and 'PASSWORD' in ElasticConfig.__dict__:
         _es = Elasticsearch(
             cloud_id=ElasticConfig.CLOUD_ID,
-            http_auth=(ElasticConfig.USERNAME, ElasticConfig.PASSWORD)
+            http_auth=(ElasticConfig.ES_USERNAME, ElasticConfig.ES_PASSWORD)
         )
     elif 'HOST' in ElasticConfig.__dict__ \
-            and 'PORT' in ElasticConfig.__dict__:
-        _es = Elasticsearch([{'host': ElasticConfig.HOST, 'port': ElasticConfig.PORT}],
+            and 'PORT' in ElasticConfig.__dict__ \
+            and 'USERNAME' in ElasticConfig.__dict__ \
+            and 'PASSWORD' in ElasticConfig.__dict__:
+        _es = Elasticsearch([{'host': ElasticConfig.ES_HOST, 'port': ElasticConfig.ES_PORT}],
+                            http_auth=(ElasticConfig.ES_USERNAME, ElasticConfig.ES_PASSWORD),
                             timeout=30, max_retries=10, retry_on_timeout=True)
     else:
         _es = Elasticsearch()
